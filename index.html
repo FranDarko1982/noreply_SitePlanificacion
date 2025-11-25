@@ -35,9 +35,6 @@
         <a href="#inicio" data-section="inicio" class="nav-link active">
           Inicio
         </a>
-        <a href="#equipo" data-section="equipo" class="nav-link">
-          Equipo
-        </a>
         <a href="#proyectos" data-section="proyectos" class="nav-link">
           Proyectos
         </a>
@@ -47,6 +44,11 @@
         <a href="#proximos" data-section="proximos" class="nav-link">
           Próximos desarrollos
         </a>
+        <? if (typeof isAuthorized !== 'undefined' && isAuthorized) { ?>
+        <a href="#equipo" data-section="equipo" class="nav-link">
+          Acceso equipo
+        </a>
+        <? } ?>
       </nav>
     </header>
 
@@ -56,9 +58,11 @@
         <?!= include('inicio'); ?>
       </section>
 
+      <? if (typeof isAuthorized !== 'undefined' && isAuthorized) { ?>
       <section id="section-equipo" class="section">
         <?!= include('equipo'); ?>
       </section>
+      <? } ?>
 
       <section id="section-proyectos" class="section">
         <?!= include('proyectos'); ?>
