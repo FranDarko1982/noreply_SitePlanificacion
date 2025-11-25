@@ -90,6 +90,12 @@ function include(filename) {
 
 function getInsightsData() {
   Logger.log('---------- getInsightsData() started ----------');
+  const userEmail = getActiveUserEmail();
+  const authorized = isUserAuthorized(userEmail);
+  Logger.log(`Authorization check for Insights - user: ${userEmail}, authorized: ${authorized}`);
+  if (!authorized) {
+    throw new Error('ACCESO_NO_AUTORIZADO');
+  }
   try {
     const SPREADSHEET_ID = PropertiesService.getScriptProperties().getProperty('SPREADSHEET_ID');
     Logger.log(`SPREADSHEET_ID: ${SPREADSHEET_ID}`);

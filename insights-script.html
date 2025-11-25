@@ -22,11 +22,16 @@
 
     function onRenderChartsFailure(error) {
       console.error("Error fetching or rendering insights data:", error);
-      // Display an error message to the user
-      document.getElementById('line-chart').innerHTML = '<p class="error-message">Error al cargar el gráfico.</p>';
-      document.getElementById('bar-chart').innerHTML = '<p class="error-message">Error al cargar el gráfico.</p>';
-      document.getElementById('histogram-chart').innerHTML = '<p class="error-message">Error al cargar el gráfico.</p>';
-      document.getElementById('heatmap-chart').innerHTML = '<p class="error-message">Error al cargar el mapa de calor.</p>';
+      const errorMessage = (error && error.message) ? error.message : error;
+      const isUnauthorized = errorMessage && errorMessage.toString().includes('ACCESO_NO_AUTORIZADO');
+      const userMessage = isUnauthorized
+        ? 'No tienes acceso a los Insights. Verifica que tu correo esté en la hoja Usuarios.'
+        : 'Error al cargar los Insights. Intenta de nuevo más tarde.';
+
+      document.getElementById('line-chart').innerHTML = `<p class="error-message">${userMessage}</p>`;
+      document.getElementById('bar-chart').innerHTML = `<p class="error-message">${userMessage}</p>`;
+      document.getElementById('histogram-chart').innerHTML = `<p class="error-message">${userMessage}</p>`;
+      document.getElementById('heatmap-chart').innerHTML = `<p class="error-message">${userMessage}</p>`;
     }
 
     function renderCharts(data) {
