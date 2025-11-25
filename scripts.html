@@ -1,0 +1,52 @@
+<script>
+  (function () {
+    const links = Array.from(document.querySelectorAll('.nav-link'));
+    const sections = {
+      inicio: document.getElementById('section-inicio'),
+      equipo: document.getElementById('section-equipo'),
+      proyectos: document.getElementById('section-proyectos'),
+      documentacion: document.getElementById('section-documentacion'),
+      proximos: document.getElementById('section-proximos')
+    };
+
+    const navToggle = document.querySelector('.nav-toggle');
+    const navLinks = document.querySelector('.nav-links');
+    document.getElementById('year').textContent = new Date().getFullYear();
+
+    function setActive(sectionKey) {
+      // Mostrar sección
+      Object.entries(sections).forEach(([key, el]) => {
+        el.classList.toggle('visible', key === sectionKey);
+      });
+      // Resaltar enlace activo
+      links.forEach(a => {
+        a.classList.toggle('active', a.dataset.section === sectionKey);
+      });
+      // Actualizar hash (sin scroll brusco)
+      history.replaceState(null, '', `#${sectionKey}`);
+      // Cerrar menú móvil
+      navLinks.classList.remove('open');
+      // Scroll suave al inicio
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+    }
+
+    // Enlaces
+    links.forEach(a => {
+      a.addEventListener('click', (e) => {
+        e.preventDefault();
+        const key = a.dataset.section;
+        if (!key) return;
+        setActive(key);
+      });
+    });
+
+    // Toggle móvil
+    navToggle.addEventListener('click', () => {
+      navLinks.classList.toggle('open');
+    });
+
+    // Cargar desde hash
+    const initial = (location.hash || '#inicio').replace('#','');
+    setActive(sections[initial] ? initial : 'inicio');
+  })();
+</script>

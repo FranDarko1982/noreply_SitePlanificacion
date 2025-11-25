@@ -1,0 +1,82 @@
+<!DOCTYPE html>
+<html lang="es">
+  <head>
+    <meta charset="UTF-8" />
+    <meta
+      name="viewport"
+      content="width=device-width, initial-scale=1, viewport-fit=cover"
+    />
+    <title>Planificación Logística y Teletrabajo</title>
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600&family=Roboto:wght@300;400;500;700&display=swap"
+      rel="stylesheet"
+    />
+    <!-- Iconos (Material Symbols) -->
+    <link
+      href="https://fonts.googleapis.com/css2?family=Material+Symbols+Rounded"
+      rel="stylesheet"
+    />
+    <?!= include('styles'); ?>
+  </head>
+  <body>
+    <header class="navbar">
+      <div class="nav-left">
+        <div class="brand">
+          <img src="https://ac-landing-pages-user-uploads-production.s3.amazonaws.com/0000107165/6b9853cd-90a0-47a5-80f9-c108e787dfcb.png" alt="Intelcia Logo" class="brand-logo">
+        </div>
+      </div>
+
+      <button class="nav-toggle" aria-label="Abrir menú">
+        <span class="material-symbols-rounded">menu</span>
+      </button>
+
+      <nav class="nav-links">
+        <a href="#inicio" data-section="inicio" class="nav-link active">
+          Inicio
+        </a>
+        <a href="#equipo" data-section="equipo" class="nav-link">
+          Equipo
+        </a>
+        <a href="#proyectos" data-section="proyectos" class="nav-link">
+          Proyectos
+        </a>
+        <a href="#documentacion" data-section="documentacion" class="nav-link">
+          Documentación
+        </a>
+        <a href="#proximos" data-section="proximos" class="nav-link">
+          Próximos desarrollos
+        </a>
+      </nav>
+    </header>
+
+    <main id="app" class="container">
+      <!-- Secciones (parciales) -->
+      <section id="section-inicio" class="section visible">
+        <?!= include('inicio'); ?>
+      </section>
+
+      <section id="section-equipo" class="section">
+        <?!= include('equipo'); ?>
+      </section>
+
+      <section id="section-proyectos" class="section">
+        <?!= include('proyectos'); ?>
+      </section>
+
+      <section id="section-documentacion" class="section">
+        <?!= include('documentacion'); ?>
+      </section>
+
+      <section id="section-proximos" class="section">
+        <?!= include('proximos'); ?>
+      </section>
+    </main>
+
+    <footer class="footer">
+      <div>© <span id="year"></span> Intelcia · Departamento de Planificación Logística y Teletrabajo</div>
+    </footer>
+
+    <?!= include('scripts'); ?>
+  </body>
+</html>
