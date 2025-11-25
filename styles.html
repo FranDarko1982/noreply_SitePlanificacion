@@ -96,6 +96,10 @@
   }
   .card h3{margin:0 0 6px; font-size:18px}
   .card p{margin:0; color:var(--ink-500); line-height:1.6}
+  .card canvas {
+    max-width: 100%;
+    min-height: 250px; /* Ensure canvases are visible */
+  }
   .kpi{
     display:flex; align-items:center; justify-content:space-between;
     gap:10px;
@@ -155,4 +159,52 @@
     .col-4{grid-column: span 6}
     .col-6{grid-column: span 6}
   }
+
+  /* INSIGHTS */
+  .loader {
+    border: 4px solid var(--ink-100);
+    border-top: 4px solid var(--intelcia-fucsia);
+    border-radius: 50%;
+    width: 40px;
+    height: 40px;
+    animation: spin 1s linear infinite;
+    margin: 20px auto;
+  }
+
+  @keyframes spin {
+    0% { transform: rotate(0deg); }
+    100% { transform: rotate(360deg); }
+  }
+
+  .heatmap-table {
+    width: 100%;
+    border-collapse: collapse;
+    margin-top: 15px;
+  }
+
+  .heatmap-table th, .heatmap-table td {
+    border: 1px solid var(--ink-100);
+    padding: 4px;
+    text-align: center;
+    font-size: 12px;
+  }
+
+  .heatmap-table th {
+    background-color: var(--surface-alt);
+  }
+
+  #summary-table {
+    width: 100%;
+    border-collapse: collapse;
+    margin-top: 15px;
+  }
+  #summary-table td {
+    padding: 8px;
+    border-bottom: 1px solid var(--ink-100);
+  }
+  #summary-table td:last-child {
+    font-weight: 600;
+    text-align: right;
+  }
+
 </style>

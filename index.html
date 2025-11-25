@@ -27,6 +27,7 @@
       rel="stylesheet"
     />
     <?!= include('styles'); ?>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
   </head>
   <body>
     <header class="navbar">
@@ -57,6 +58,9 @@
         <a href="#equipo" data-section="equipo" class="nav-link">
           Acceso equipo
         </a>
+        <a href="#insights" data-section="insights" class="nav-link">
+          Insights
+        </a>
         <? } ?>
       </nav>
     </header>
@@ -70,6 +74,73 @@
       <? if (typeof isAuthorized !== 'undefined' && isAuthorized) { ?>
       <section id="section-equipo" class="section">
         <?!= include('equipo'); ?>
+      </section>
+      <section id="section-insights" class="section">
+        <div class="hero">
+          <div style="display:flex; align-items:center; gap:20px;">
+            <span class="material-symbols-rounded" style="font-size:48px; color:var(--intelcia-fucsia);">insights</span>
+            <div>
+              <h1>Insights</h1>
+              <p>Análisis de actividad y uso de la aplicación.</p>
+            </div>
+          </div>
+        </div>
+
+        <div class="grid" style="margin-top:20px">
+          <div class="col-6">
+            <div class="card">
+              <h3>Accesos por día/semana</h3>
+              <div id="line-chart"></div>
+            </div>
+          </div>
+
+          <div class="col-6">
+            <div class="card">
+              <h3>Usuarios únicos por periodo</h3>
+              <div id="bar-chart"></div>
+            </div>
+          </div>
+
+          <div class="col-12">
+            <div class="card">
+              <h3>Nº de accesos por usuario</h3>
+              <div id="histogram-chart"></div>
+            </div>
+          </div>
+
+          <div class="col-12">
+            <div class="card">
+              <h3>Mapa de calor (Día x Hora)</h3>
+              <div id="heatmap-chart"></div>
+            </div>
+          </div>
+        </div>
+
+        <div class="card" style="margin-top:20px;">
+            <h3>Estadísticas Generales</h3>
+            <table id="summary-table">
+                <tbody>
+                    <tr>
+                        <td>Total de usuarios</td>
+                        <td id="total-users"></td>
+                    </tr>
+                    <tr>
+                        <td>Usuarios nuevos vs. recurrentes</td>
+                        <td id="new-vs-recurrent-users"></td>
+                    </tr>
+                    <tr>
+                        <td>Media de accesos por usuario</td>
+                        <td id="avg-accesses-per-user"></td>
+                    </tr>
+                    <tr>
+                        <td>Día con más actividad</td>
+                        <td id="busiest-day"></td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+
+        <?!= include('insights-script.html'); ?>
       </section>
       <? } ?>
 

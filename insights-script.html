@@ -1,0 +1,185 @@
+<script>
+  (function() {
+    let chartsRendered = false;
+    let chartInstances = {}; // To store chart instances for destruction
+
+    window.addEventListener('section-shown', (e) => {
+      if (e.detail.sectionKey === 'insights' && !chartsRendered) {
+        showLoadingIndicators();
+        // Use withFailureHandler to catch errors from server-side function
+        google.script.run.withSuccessHandler(renderCharts).withFailureHandler(onRenderChartsFailure).getInsightsData();
+        chartsRendered = true;
+      }
+    });
+
+    function showLoadingIndicators() {
+      document.getElementById('line-chart').innerHTML = '<div class="loader"></div>';
+      document.getElementById('bar-chart').innerHTML = '<div class="loader"></div>';
+      document.getElementById('histogram-chart').innerHTML = '<div class="loader"></div>';
+      document.getElementById('heatmap-chart').innerHTML = '<div class="loader"></div>';
+    }
+
+    function onRenderChartsFailure(error) {
+      console.error("Error fetching or rendering insights data:", error);
+      // Display an error message to the user
+      document.getElementById('line-chart').innerHTML = '<p class="error-message">Error al cargar el gráfico.</p>';
+      document.getElementById('bar-chart').innerHTML = '<p class="error-message">Error al cargar el gráfico.</p>';
+      document.getElementById('histogram-chart').innerHTML = '<p class="error-message">Error al cargar el gráfico.</p>';
+      document.getElementById('heatmap-chart').innerHTML = '<p class="error-message">Error al cargar el mapa de calor.</p>';
+    }
+
+    function renderCharts(data) {
+      console.log("Data received for charts:", data); // Log the data received from server
+      console.log("Accesses Per Day:", data.accessesPerDay);
+      console.log("Unique Users Per Period:", data.uniqueUsersPerPeriod);
+      console.log("Accesses Per User:", data.accessesPerUser);
+      console.log("Heatmap Data:", data.heatmapData);
+      console.log("Summary Data:", data.summary);
+
+      // Clear loading indicators
+      document.getElementById('line-chart').innerHTML = '';
+      document.getElementById('bar-chart').innerHTML = '';
+      document.getElementById('histogram-chart').innerHTML = '';
+      document.getElementById('heatmap-chart').innerHTML = '';
+
+      // Destroy existing charts before rendering new ones to prevent conflicts
+      Object.values(chartInstances).forEach(chart => {
+        if (chart) chart.destroy(); // Ensure chart exists before destroying
+      });
+      chartInstances = {}; // Reset instances
+
+      renderLineChart(data.accessesPerDay);
+      renderBarChart(data.uniqueUsersPerPeriod);
+      renderHistogram(data.accessesPerUser);
+      renderHeatmap(data.heatmapData);
+      renderSummaryTable(data.summary);
+    }
+
+    function createChartCanvas(parentId, chartId) {
+      const parentElement = document.getElementById(parentId);
+      parentElement.innerHTML = ''; // Clear previous content (e.g., loader or old canvas)
+      const canvas = document.createElement('canvas');
+      canvas.id = chartId; // Assign a unique ID
+
+      // Set explicit dimensions based on parent, or a default
+      canvas.width = parentElement.offsetWidth > 0 ? parentElement.offsetWidth : 400; // Fallback width
+      canvas.height = parentElement.offsetHeight > 0 ? parentElement.offsetHeight : 250; // Fallback height
+
+      parentElement.appendChild(canvas);
+      return canvas.getContext('2d');
+    }
+
+    function renderLineChart(data) {
+      console.log("Attempting to render Line Chart with data:", data);
+      try {
+        const ctx = createChartCanvas('line-chart', 'lineChartCanvas');
+        chartInstances.lineChart = new Chart(ctx, {
+          type: 'line',
+          data: {
+            labels: data.labels,
+            datasets: [{
+              label: 'Accesos',
+              data: data.values,
+              borderColor: 'var(--intelcia-fucsia)',
+              tension: 0.1
+            }]
+          }
+        });
+        console.log("Line Chart rendered successfully.");
+      } catch (error) {
+        console.error("Error rendering Line Chart:", error);
+        document.getElementById('line-chart').innerHTML = '<p class="error-message">Error al cargar el gráfico de línea.</p>';
+      }
+    }
+
+    function renderBarChart(data) {
+      console.log("Attempting to render Bar Chart with data:", data);
+      try {
+        const ctx = createChartCanvas('bar-chart', 'barChartCanvas');
+        chartInstances.barChart = new Chart(ctx, {
+          type: 'bar',
+          data: {
+            labels: data.labels,
+            datasets: [{
+              label: 'Usuarios únicos',
+              data: data.values,
+              backgroundColor: 'var(--intelcia-fucsia)'
+            }]
+          }
+        });
+        console.log("Bar Chart rendered successfully.");
+      } catch (error) {
+        console.error("Error rendering Bar Chart:", error);
+        document.getElementById('bar-chart').innerHTML = '<p class="error-message">Error al cargar el gráfico de barras.</p>';
+      }
+    }
+
+    function renderHistogram(data) {
+      console.log("Attempting to render Histogram Chart with data:", data);
+      try {
+        const ctx = createChartCanvas('histogram-chart', 'histogramChartCanvas');
+        chartInstances.histogramChart = new Chart(ctx, {
+          type: 'bar',
+          data: {
+            labels: data.labels,
+            datasets: [{
+              label: 'Nº de usuarios',
+              data: data.values,
+              backgroundColor: 'var(--intelcia-fucsia)'
+            }]
+          }
+        });
+        console.log("Histogram Chart rendered successfully.");
+      } catch (error) {
+        console.error("Error rendering Histogram Chart:", error);
+        document.getElementById('histogram-chart').innerHTML = '<p class="error-message">Error al cargar el histograma.</p>';
+      }
+    }
+
+    function renderHeatmap(data) {
+      const container = document.getElementById('heatmap-chart');
+      container.innerHTML = ''; // Limpiar contenedor
+      const table = document.createElement('table');
+      table.className = 'heatmap-table';
+
+      const thead = table.createTHead();
+      const headerRow = thead.insertRow();
+      const emptyTh = document.createElement('th');
+      headerRow.appendChild(emptyTh);
+
+      for (let i = 0; i < 24; i++) {
+        const th = document.createElement('th');
+        th.textContent = i.toString().padStart(2, '0');
+        headerRow.appendChild(th);
+      }
+
+      const tbody = table.createTBody();
+      // Handle case where data or values are empty to avoid Math.max error
+      const allValues = data.flatMap(d => d.values);
+      const maxValue = allValues.length > 0 ? Math.max(...allValues) : 0;
+
+      data.forEach(rowData => {
+        const row = tbody.insertRow();
+        const th = document.createElement('th');
+        th.textContent = rowData.day;
+        row.appendChild(th);
+
+        rowData.values.forEach(value => {
+          const cell = row.insertCell();
+          cell.textContent = value;
+          const opacity = maxValue > 0 ? value / maxValue : 0;
+          cell.style.backgroundColor = `rgba(230, 0, 126, ${opacity})`;
+        });
+      });
+
+      container.appendChild(table);
+    }
+
+    function renderSummaryTable(data) {
+      document.getElementById('total-users').textContent = data.totalUsers;
+      document.getElementById('new-vs-recurrent-users').textContent = `${data.newUsers} / ${data.recurrentUsers}`;
+      document.getElementById('avg-accesses-per-user').textContent = data.avgAccessesPerUser.toFixed(2);
+      document.getElementById('busiest-day').textContent = data.busiestDay;
+    }
+  })();
+</script>

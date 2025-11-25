@@ -12,7 +12,8 @@
       equipo: document.getElementById('section-equipo'),
       proyectos: document.getElementById('section-proyectos'),
       documentacion: document.getElementById('section-documentacion'),
-      proximos: document.getElementById('section-proximos')
+      proximos: document.getElementById('section-proximos'),
+      insights: document.getElementById('section-insights')
     };
 
     // --- LÓGICA ---
@@ -46,6 +47,9 @@
       
       // Opcional: llevar al usuario al principio de la página
       window.scrollTo({ top: 0, behavior: 'smooth' });
+
+      // Disparar un evento personalizado para que otros scripts puedan reaccionar
+      window.dispatchEvent(new CustomEvent('section-shown', { detail: { sectionKey } }));
     }
 
     // --- EVENT LISTENERS ---
