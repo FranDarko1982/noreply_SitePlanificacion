@@ -1,6 +1,12 @@
 <script>
   (function () {
-    const links = Array.from(document.querySelectorAll('.nav-link'));
+    // --- ELEMENTOS DEL DOM ---
+    const navToggle = document.querySelector('.nav-toggle');
+    const navLinksContainer = document.querySelector('.nav-links');
+    const navLinks = Array.from(document.querySelectorAll('.nav-link'));
+    const yearSpan = document.getElementById('year');
+
+    // Mapeo de secciones para evitar buscarlas repetidamente
     const sections = {
       inicio: document.getElementById('section-inicio'),
       equipo: document.getElementById('section-equipo'),
@@ -9,44 +15,76 @@
       proximos: document.getElementById('section-proximos')
     };
 
-    const navToggle = document.querySelector('.nav-toggle');
-    const navLinks = document.querySelector('.nav-links');
-    document.getElementById('year').textContent = new Date().getFullYear();
+    // --- LÓGICA ---
 
-    function setActive(sectionKey) {
-      // Mostrar sección
-      Object.entries(sections).forEach(([key, el]) => {
-        el.classList.toggle('visible', key === sectionKey);
+    /**
+     * Muestra una sección y oculta las demás. Actualiza el estado activo de los enlaces.
+     * @param {string} sectionKey La clave de la sección a mostrar (ej. 'proyectos').
+     */
+    function setActiveSection(sectionKey) {
+      // Recorremos el objeto de secciones
+      Object.entries(sections).forEach(([key, sectionElement]) => {
+        // CORRECCIÓN: Verificar si la sección existe en el DOM antes de manipularla.
+        // Esto evita el error si un usuario no autorizado no tiene la sección 'equipo'.
+        if (sectionElement) {
+          sectionElement.classList.toggle('visible', key === sectionKey);
+        }
       });
-      // Resaltar enlace activo
-      links.forEach(a => {
-        a.classList.toggle('active', a.dataset.section === sectionKey);
+
+      // Actualizar el enlace activo en la navegación
+      navLinks.forEach(link => {
+        link.classList.toggle('active', link.dataset.section === sectionKey);
       });
-      // Actualizar hash (sin scroll brusco)
-      history.replaceState(null, '', `#${sectionKey}`);
-      // Cerrar menú móvil
-      navLinks.classList.remove('open');
-      // Scroll suave al inicio
+
+      // Actualizar la URL sin recargar la página
+      if (history.replaceState) {
+        history.replaceState(null, '', `#${sectionKey}`);
+      }
+
+      // Al cambiar de sección, cerrar el menú móvil si está abierto
+      navLinksContainer.classList.remove('open');
+      
+      // Opcional: llevar al usuario al principio de la página
       window.scrollTo({ top: 0, behavior: 'smooth' });
     }
 
-    // Enlaces
-    links.forEach(a => {
-      a.addEventListener('click', (e) => {
-        e.preventDefault();
-        const key = a.dataset.section;
-        if (!key) return;
-        setActive(key);
+    // --- EVENT LISTENERS ---
+
+    // Asignar evento de clic a cada enlace de navegación
+    navLinks.forEach(link => {
+      link.addEventListener('click', (e) => {
+        e.preventDefault(); // Evitar el comportamiento por defecto del ancla
+        const sectionKey = link.dataset.section;
+        if (sectionKey) {
+          setActiveSection(sectionKey);
+        }
       });
     });
 
-    // Toggle móvil
-    navToggle.addEventListener('click', () => {
-      navLinks.classList.toggle('open');
-    });
+    // Evento para el botón de menú móvil
+    if (navToggle) {
+      navToggle.addEventListener('click', () => {
+        navLinksContainer.classList.toggle('open');
+      });
+    }
 
-    // Cargar desde hash
-    const initial = (location.hash || '#inicio').replace('#','');
-    setActive(sections[initial] ? initial : 'inicio');
+    // --- INICIALIZACIÓN ---
+
+    // Establecer el año actual en el pie de página
+    if (yearSpan) {
+      yearSpan.textContent = new Date().getFullYear();
+    }
+
+    // Determinar la sección inicial a mostrar basándose en la URL (ej. si se comparte un enlace como #proyectos)
+    const initialSection = (location.hash || '#inicio').substring(1);
+    
+    // Si la sección de la URL existe en nuestro objeto 'sections' (y no es nula), la mostramos.
+    // Si no, mostramos 'inicio' por defecto.
+    if (sections[initialSection]) {
+      setActiveSection(initialSection);
+    } else {
+      setActiveSection('inicio');
+    }
+
   })();
 </script>
