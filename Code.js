@@ -14,7 +14,8 @@ function isUserAuthorized(email) {
     return false;
   }
   try {
-    const spreadsheet = SpreadsheetApp.openById('1cSkutacmPTEReg1RErr0dAzllF40CcwKGe-9Blfq0KA');
+    const SPREADSHEET_ID = PropertiesService.getScriptProperties().getProperty('SPREADSHEET_ID');
+    const spreadsheet = SpreadsheetApp.openById(SPREADSHEET_ID);
     const sheet = spreadsheet.getSheetByName('usuarios');
     if (!sheet) {
       console.error('La hoja "usuarios" no existe.');
@@ -28,7 +29,12 @@ function isUserAuthorized(email) {
 
     return authorizedEmails.includes(email.trim().toLowerCase());
   } catch (e) {
-    console.error('Error al verificar la autorización: ' + e.toString());
+    console.error(JSON.stringify({
+      message: 'Error en isUserAuthorized',
+      user: email,
+      error: e.message,
+      stack: e.stack
+    }, null, 2));
     return false;
   }
 }
@@ -50,13 +56,19 @@ function doGet(e) {
   // Registrar el acceso del usuario (siempre se ejecuta)
   try {
     const timestamp = new Date();
-    const spreadsheet = SpreadsheetApp.openById('1cSkutacmPTEReg1RErr0dAzllF40CcwKGe-9Blfq0KA');
+    const SPREADSHEET_ID = PropertiesService.getScriptProperties().getProperty('SPREADSHEET_ID');
+    const spreadsheet = SpreadsheetApp.openById(SPREADSHEET_ID);
     const sheet = spreadsheet.getSheetByName('Insights');
     if (sheet) {
       sheet.appendRow([userEmail, timestamp]);
     }
   } catch (error) {
-    console.error('Error al registrar el acceso: ' + error.toString());
+    console.error(JSON.stringify({
+      message: 'Error al registrar acceso en doGet',
+      user: userEmail,
+      error: error.message,
+      stack: error.stack
+    }, null, 2));
   }
 
   // Preparar la plantilla HTML y pasarle las variables

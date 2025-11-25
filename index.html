@@ -6,6 +6,15 @@
       name="viewport"
       content="width=device-width, initial-scale=1, viewport-fit=cover"
     />
+    <meta http-equiv="Content-Security-Policy" content="
+          default-src 'self';
+          script-src 'self' 'unsafe-inline';
+          style-src 'self' https://fonts.googleapis.com 'unsafe-inline';
+          font-src 'self' https://fonts.gstatic.com;
+          img-src 'self' https://ac-landing-pages-user-uploads-production.s3.amazonaws.com https://www.tetris-db.com;
+          connect-src 'self';
+          frame-ancestors 'none';
+    ">
     <title>Planificación Logística y Teletrabajo</title>
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
     <link

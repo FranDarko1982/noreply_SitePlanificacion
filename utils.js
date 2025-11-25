@@ -1,11 +1,10 @@
 function consolidarUltimoDocEnHistorico() {
-  const FOLDER_ID = '1DMDA7wIAAox2w-G061mAXtpmtsU-5lpB';
-  const HISTORICO_DOC_ID = '1Kwt95g9-teLNt7akig3XCejD1mWFoGrzwDNecU3JUCE';
+  const props = PropertiesService.getScriptProperties();
+  const FOLDER_ID = props.getProperty('FOLDER_ID');
+  const HISTORICO_DOC_ID = props.getProperty('HISTORICO_DOC_ID');
+  const lastProcessedId = props.getProperty('LAST_DOC_ID');
   const TIMEZONE = 'Europe/Madrid';
   const PREFIX = 'Resumen Week'; // prefijo obligatorio en el nombre
-
-  const props = PropertiesService.getScriptProperties();
-  const lastProcessedId = props.getProperty('LAST_DOC_ID');
 
   // === 1) Buscar el último Google Doc por fecha de creación,
   //        cuyo nombre empiece por "Resumen Week"
