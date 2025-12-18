@@ -60,7 +60,17 @@ function doGet(e) {
     const spreadsheet = SpreadsheetApp.openById(SPREADSHEET_ID);
     const sheet = spreadsheet.getSheetByName('Insights');
     if (sheet) {
-      sheet.appendRow([userEmail, timestamp]);
+      // Evitar conflictos de escritura concurrente
+      const lock = LockService.getScriptLock();
+      if (lock.tryLock(3000)) {
+        try {
+          sheet.appendRow([userEmail, timestamp]);
+        } finally {
+          lock.releaseLock();
+        }
+      } else {
+        console.error('No se pudo obtener lock para registrar acceso de ' + userEmail);
+      }
     }
   } catch (error) {
     console.error(JSON.stringify({
@@ -96,6 +106,15 @@ function getInsightsData() {
   if (!authorized) {
     throw new Error('ACCESO_NO_AUTORIZADO');
   }
+
+  // Cache de resultados para reducir lecturas repetitivas y coste
+  const cache = CacheService.getScriptCache();
+  const cachedData = cache.get('insights-data');
+  if (cachedData) {
+    Logger.log('Devolviendo datos cacheados de insights');
+    return JSON.parse(cachedData);
+  }
+
   try {
     const SPREADSHEET_ID = PropertiesService.getScriptProperties().getProperty('SPREADSHEET_ID');
     Logger.log(`SPREADSHEET_ID: ${SPREADSHEET_ID}`);
@@ -107,13 +126,25 @@ function getInsightsData() {
     }
     Logger.log('Sheet "Insights" opened successfully.');
 
-    const data = sheet.getDataRange().getValues();
-    Logger.log(`Raw data from sheet (first 5 rows): ${JSON.stringify(data.slice(0, 5))}`);
-    // Omitir la fila de la cabecera
-    const records = data.slice(1).map(row => ({ email: row[0], timestamp: new Date(row[1]) }));
+    const lastRow = sheet.getLastRow();
+    if (lastRow < 2) {
+      Logger.log('Sin datos en hoja de Insights');
+      return {
+        accessesPerDay: { labels: [], values: [] },
+        uniqueUsersPerPeriod: { labels: [], values: [] },
+        accessesPerUser: { labels: [], values: [] },
+        heatmapData: [],
+        summary: { totalUsers: 0, newUsers: 0, recurrentUsers: 0, avgAccessesPerUser: 0, busiestDay: '-' }
+      };
+    }
+
+    const dataRange = sheet.getRange(2, 1, lastRow - 1, 2).getValues();
+    Logger.log(`Rows read: ${dataRange.length}`);
+    const records = dataRange
+      .filter(row => row[0] && row[1])
+      .map(row => ({ email: row[0], timestamp: new Date(row[1]) }));
     Logger.log(`Processed records (first 5): ${JSON.stringify(records.slice(0, 5))}`);
     Logger.log(`Total records: ${records.length}`);
-
 
     // --- CÁLCULOS ---
     Logger.log('Starting calculations...');
@@ -237,13 +268,15 @@ function getInsightsData() {
     Logger.log(`Summary data: ${JSON.stringify(summary)}`);
 
     Logger.log('---------- getInsightsData() finished successfully ----------');
-    return {
+    const response = {
       accessesPerDay,
       uniqueUsersPerPeriod,
       accessesPerUser,
       heatmapData: reorderedHeatmapData,
       summary
     };
+    cache.put('insights-data', JSON.stringify(response), 300); // Cache 5 minutos
+    return response;
 
   } catch (e) {
     Logger.log('---------- getInsightsData() failed ----------');
